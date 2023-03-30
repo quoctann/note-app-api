@@ -1,10 +1,7 @@
 /*
- * ./src/config/database/index.js - Database configuration
- * Connect to MongoDB
- *
- * (C) 2023 Tan Tran Quoc <contact.tantranquoc@gmail.com>
- *
- * This code is licensed under MIT.
+ * ./src/config/database/index.js
+ * This file contains database configuration.
+ * Connect to MongoDB.
  */
 
 const mongoose = require('mongoose');
@@ -14,7 +11,10 @@ const mongoose = require('mongoose');
  */
 async function connect() {
   try {
-    await mongoose.connect('mongodb://localhost:27017/note-app', {
+    // 'mongodb://localhost:27017/note-app'
+    const mongoDbUri = process.env.MONGODB_URI;
+
+    await mongoose.connect(mongoDbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });

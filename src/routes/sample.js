@@ -1,15 +1,13 @@
 /*
- * ./src/routes/sample.js - This is routing for sample
- *
- * (C) 2023 Tan Tran Quoc <contact.tantranquoc@gmail.com>
- *
- * This code is licensed under MIT.
+ * ./src/routes/sample.js
+ * This file define routing for example
+ * Use this example to define other routing files.
  */
 
 const express = require('express');
 // eslint-disable-next-line new-cap
 const router = express.Router();
-const sampleController = require('../app/controller/SampleController');
+const sampleController = require('../app/controllers/SampleController');
 
 router.get('/', sampleController.index);
 

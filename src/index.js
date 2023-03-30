@@ -1,9 +1,6 @@
 /*
- * ./src/index.js - This is the application entry point
- *
- * (C) 2023 Tan Tran Quoc <contact.tantranquoc@gmail.com>
- *
- * This code is licensed under MIT.
+ * ./src/index.js
+ * This is application entry point, the first thing that Express execute.
  */
 
 const createError = require('http-errors');
@@ -11,6 +8,7 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+require('dotenv').config();
 
 // API routing configuration method
 const route = require('./routes/index');
