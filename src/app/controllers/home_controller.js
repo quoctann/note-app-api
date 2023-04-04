@@ -1,13 +1,13 @@
 /*
- * ./src/app/controller/SampleController.js
- * This file contains example controller.
+ * ./src/app/controller/home_controller.js
+ * This file contains homepage controller.
  * Use controller to handle client requests.
  */
 
 /**
- * Sample controller
+ * Home controller
  */
-class SampleController {
+class HomeController {
   /**
    * GET homepage
    * @param {*} req Request
@@ -19,4 +19,4 @@ class SampleController {
   }
 }
 
-module.exports = new SampleController();
+module.exports = new HomeController();

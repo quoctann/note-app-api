@@ -5,7 +5,10 @@
  */
 
 // Router for sample
-const sampleRouter = require('./sample');
+const homeRouter = require('./home_router');
+const userRouter = require('./user_router');
+const noteRouter = require('./note_router');
+const topicRouter = require('./topic_router');
 
 /**
  * Request URL will be matched with router definition on top-down order.
@@ -16,7 +19,10 @@ const sampleRouter = require('./sample');
  * @param {Express} app Instance of Express
  */
 function route(app) {
-  app.use('/', sampleRouter);
+  app.use('/', homeRouter);
+  app.use('/user', userRouter);
+  app.use('/note', noteRouter);
+  app.use('/topic', topicRouter);
 }
 
 module.exports = route;
