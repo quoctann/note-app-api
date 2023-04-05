@@ -25,13 +25,13 @@ class UserController {
   }
 
   /**
-   * POST perform user login action, give them jwt to authenticate
+   * POST perform user login action, give them jwt to authenticate (API)
    * @param {*} req Request
    * @param {*} res Respond
    * @param {*} next Next
    * @return {*} Response
    */
-  async login(req, res, next) {
+  async loginApi(req, res, next) {
     try {
       const user = await User.findOne({username: req.body.username});
 
@@ -86,17 +86,7 @@ class UserController {
   }
 
   /**
-   * POST perform user logout action
-   * @param {*} req Request
-   * @param {*} res Respond
-   * @param {*} next Next
-   */
-  logout(req, res, next) {
-    res.render('index', {title: 'Express'});
-  }
-
-  /**
-   * GET test authentication get secure resource
+   * GET test authentication get secure resource (API)
    * @param {*} req Request
    * @param {*} res Respond
    * @param {*} next Next
@@ -121,6 +111,84 @@ class UserController {
     } catch (error) {
       return res.status(401).json({error: 'Not Authorized'});
     }
+  }
+
+  /**
+ * POST Server side rendering login handler
+ * @param {*} req Request
+ * @param {*} res Respond
+ * @param {*} next Next
+ * @return {*} Return value
+ */
+  async login(req, res, next) {
+    try {
+      if (req.session.userId) {
+        res.render('login', {message: 'User already logged in.'});
+      } else {
+        const user = await User.findOne({username: req.body.username});
+
+        if (user) {
+          // eslint-disable-next-line max-len
+          bcrypt.compare(req.body.password, user.password, function(err, result) {
+            if (result) {
+              // Valid user
+              req.session.userId = user.uid;
+              req.session.username = user.username;
+              res.redirect('/');
+            } else {
+              // Un-valid user
+              return res.render('login',
+                  // eslint-disable-next-line max-len
+                  {message: 'Indicated username or/and password are not correct.'});
+            }
+          });
+        } else {
+          // Un-valid user
+          return res.render('login',
+              {message: 'Indicated username or/and password are not correct.'});
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  /**
+ * GET logout user by delete session
+ * @param {*} req Request
+ * @param {*} res Respond
+ * @param {*} next Next
+ */
+  logout(req, res, next) {
+    if (req.session.userId) {
+      delete req.session.userId;
+      delete req.session.username;
+      res.redirect('/');
+    } else {
+      res.redirect('/', {message: 'User is not logged in.'});
+    }
+  }
+
+  /**
+ * GET render register page
+ * @param {*} req Request
+ * @param {*} res Respond
+ * @param {*} next Next
+ * @return {*} Return value
+ */
+  getRegister(req, res, next) {
+    return res.render('register');
+  }
+
+  /**
+ * GET render login page
+ * @param {*} req Request
+ * @param {*} res Respond
+ * @param {*} next Next
+ * @return {*} Return value
+ */
+  getLogin(req, res, next) {
+    return res.render('login');
   }
 }
 

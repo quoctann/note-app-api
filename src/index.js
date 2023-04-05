@@ -8,6 +8,8 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const hbs = require('hbs');
+const session = require('express-session');
 require('dotenv').config();
 
 // API routing configuration method
@@ -20,6 +22,8 @@ const db = require('./config/database');
 const app = express();
 
 // View engine setup (use Handlebars)
+hbs.registerPartials(
+    path.join(__dirname, 'resources', 'views', 'partials'), function(err) { });
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'resources', 'views'));
 
@@ -31,6 +35,16 @@ app.use(express.static(path.join(__dirname, '/public')));
 
 // Connect to database (MongoDB)
 db.connect();
+
+// decode or encode session
+app.use(session({
+  secret: 'Any normal Word',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 2*60*1000,
+  },
+}));
 
 // Routing, go into ./routes/index.js for next processing
 route(app);

@@ -15,7 +15,12 @@ class HomeController {
    * @param {*} next Next
    */
   index(req, res, next) {
-    res.render('index', {title: 'Express'});
+    if (req.session.userId) {
+      // Already logged in
+      res.render('main_app', {username: req.session.username, isLogin: true});
+    } else {
+      res.render('login', {title: 'Express', isLogin: false});
+    }
   }
 }
 
