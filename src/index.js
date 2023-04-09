@@ -46,6 +46,12 @@ app.use(session({
   },
 }));
 
+// Create session.SOMETHING global variable for handlebars
+app.use(function(req, res, next) {
+  res.locals.session = req.session;
+  next();
+});
+
 // Routing, go into ./routes/index.js for next processing
 route(app);
 

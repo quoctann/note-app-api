@@ -1,59 +1,190 @@
 <div class="main-app mt-4">
-  <div>
-    <form action="POST">
-      <p>Create note</p>
-      <div class="mb-3">
-        <label for="note-title" class="form-label">Note title</label>
-        <input type="text" class="form-control" id="note-title" name="title">
-      </div>
-      
-      <div class="mb-3">
-        <label for="note-content" class="form-label">Note content</label>
-        <input type="text" class="form-control" id="note-content" aria-describedby="note-content-help" name="content">
-      <div id="note-content-help" class="form-text">Helper text here</div>
-      </div>
-    </form>
+  {{!-- Hidden area --}}
 
-  </div>
-  <div class="row my-1">
-  <div class="col-sm-6">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Special title treatment</h5>
-        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-        <a href="#" class="btn btn-primary">Go somewhere</a>
+  {{!-- Create note form modal--}}
+  <div class="modal fade" id="createNoteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">      
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Create note</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          {{!-- Create note data --}}
+          <form action="/note/create" method="POST">
+            <div class="mb-3">
+              <label for="note-title" class="form-label">Note title</label>
+              <input type="text" class="form-control" id="note-title" name="title">
+            </div>            
+            <div class="mb-3">
+              <label for="note-content" class="form-label">Note content</label>
+              {{!-- <input type="text" class="form-control" id="note-content" aria-describedby="note-content-help" name="content"> --}}
+              <div class="form-floating">
+                <textarea rows="20" class="form-control" placeholder="Leave a comment here" id="floatingTextarea" name="content"></textarea>
+                <label for="floatingTextarea">How do you feel today? ⛅</label>
+              </div>
+              <div id="note-content-help" class="form-text">Helper text here</div>
+            </div>
+            {{!-- Hidden input for user uid --}}
+            {{!-- <input type="hidden" value="{{session.userId}}"> --}}
+            {{!-- TODO: list topic here for select, GET data when rendering --}}
+            <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+          </form>
+        </div>
+        
       </div>
-    </div>
-  </div>
-  <div class="col-sm-6">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Special title treatment</h5>
-        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-        <a href="#" class="btn btn-primary">Go somewhere</a>
-      </div>
-    </div>
-  </div>
+    </div>    
   </div>
 
-  <div class="row my-1">
-  <div class="col-sm-6">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Special title treatment</h5>
-        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-        <a href="#" class="btn btn-primary">Go somewhere</a>
+  {{!-- Create topic form modal --}}
+  <div class="modal fade" id="createTopicModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">      
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Create topic</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          {{!-- Create topic data --}}
+          <form action="POST">
+            <div class="mb-3">
+              <label for="topic-title" class="form-label">Title</label>
+              <input type="text" class="form-control" id="topic-title" name="title">
+            </div>            
+            <div class="mb-3">
+              <label for="topic-content" class="form-label">Description</label>
+              {{!-- <input type="text" class="form-control" id="note-content" aria-describedby="note-content-help" name="content"> --}}
+              <div class="form-floating">
+                <textarea rows="20" class="form-control" placeholder="Leave a comment here" id="floatingTextarea" name="description"></textarea>
+                <label for="floatingTextarea">More productivity right? 💪</label>
+              </div>
+              <div id="topic-content-help" class="form-text">Helper text here</div>
+            </div>
+            {{!-- TODO: list user notes here for select, GET data when rendering --}}
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
       </div>
+    </div>    
+  </div>
+
+  {{!-- Visible area --}}
+
+  {{!-- Open create note/topic form modal --}}
+  <div class="creating-button-group my-2">
+    <button type="button" class="btn btn-primary m-1" data-bs-toggle="modal" data-bs-target="#createNoteModal">
+    Create new note
+    </button>
+
+    <button type="button" class="btn btn-outline-primary m-1" data-bs-toggle="modal" data-bs-target="#createTopicModal">
+    Create new topic
+    </button>
+  </div>
+
+  {{!-- Displaying content area --}}
+  <div class="row">
+    {{!-- Left side contains topics list --}}
+    <div class="col-4 left-side p-3">
+
+      {{!-- TODO: fill list of topics here --}}
+      <ul class="list-group">
+        {{!-- Sample item --}}
+        <li class="list-group-item d-flex justify-content-between align-items-start">
+          <div class="ms-2 me-auto">
+            <div class="fw-bold"><a href="#">Subheading</a></div>
+            Content for list item
+          </div>
+          <span class="badge bg-primary rounded-pill">14</span>
+        </li>
+
+        <li class="list-group-item d-flex justify-content-between align-items-start">
+          <div class="ms-2 me-auto">
+            <div class="fw-bold">Subheading</div>
+            Content for list item
+          </div>
+          <span class="badge bg-primary rounded-pill">14</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-start">
+          <div class="ms-2 me-auto">
+            <div class="fw-bold">Subheading</div>
+            Content for list item
+          </div>
+          <span class="badge bg-primary rounded-pill">14</span>
+        </li>
+      <ul/>
+
     </div>
-  </div>
-  <div class="col-sm-6">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Special title treatment</h5>
-        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-        <a href="#" class="btn btn-primary">Go somewhere</a>
-      </div>
+
+    {{!-- Right side contains notes list --}}
+    <div class="col-8 right-side p-3">
+      {{!-- TODO: get list of note and fill here --}}
+      <div class="row">
+        {{!-- Sample item --}}
+        <div class="item col-sm-6 col-lg-4 mb-3">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Special title treatment</h5>
+              <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+              <a href="#" class="btn btn-primary"><i class="fa-solid fa-edit"></i> Edit</a>
+              <a href="#" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Trash</a>
+            </div>
+          </div>
+        </div> 
+
+        <div class="item col-sm-6 col-lg-4 mb-3">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Special title treatment</h5>
+              <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+              <a href="#" class="btn btn-primary"><i class="fa-solid fa-edit"></i> Edit</a>
+              <a href="#" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Trash</a>
+            </div>
+          </div>
+        </div> 
+
+        <div class="item col-sm-6 col-lg-4 mb-3">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Special title treatment</h5>
+              <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+              <a href="#" class="btn btn-primary"><i class="fa-solid fa-edit"></i> Edit</a>
+              <a href="#" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Trash</a>
+            </div>
+          </div>
+        </div> 
+
+        <div class="item col-sm-6 col-lg-4 mb-3">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Special title treatment</h5>
+              <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+              <a href="#" class="btn btn-primary"><i class="fa-solid fa-edit"></i> Edit</a>
+              <a href="#" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Trash</a>
+            </div>
+          </div>
+        </div> 
+
+        <div class="item col-sm-6 col-lg-4 mb-3">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Special title treatment</h5>
+              <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+              <a href="#" class="btn btn-primary"><i class="fa-solid fa-edit"></i> Edit</a>
+              <a href="#" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Trash</a>
+            </div>
+          </div>
+        </div> 
+
+      </div>         
     </div>
-  </div>
-  </div>
+
+  </div> 
+  {{!-- End displaying area --}}
+
 </div>

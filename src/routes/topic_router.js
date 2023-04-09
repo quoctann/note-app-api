@@ -9,6 +9,9 @@ const express = require('express');
 const router = express.Router();
 const topicController = require('../app/controllers/topic_controller');
 
-router.get('/', topicController.index);
+// router.get('/', topicController.index);
+router.post('/create', topicController.createSimpleTopic);
+router.post('/add-note', topicController.addNoteToTopic);
+router.get('/', topicController.getTopicWithPopulate);
 
 module.exports = router;

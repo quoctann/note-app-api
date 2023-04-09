@@ -10,5 +10,6 @@ const router = express.Router();
 const noteController = require('../app/controllers/note_controller');
 
 router.get('/', noteController.index);
+router.post('/create', noteController.create);
 
 module.exports = router;

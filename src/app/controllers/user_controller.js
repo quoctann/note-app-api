@@ -76,7 +76,7 @@ class UserController {
     });
 
     user.save()
-        .then(() => res.status(201).json(user))
+        .then(() => res.status(201).redirect('/'))
         .catch((error) => {
           console.log(error);
           return res.status(400);
