@@ -8,7 +8,8 @@ const express = require('express');
 // eslint-disable-next-line new-cap
 const router = express.Router();
 const homeController = require('../app/controllers/home_controller');
+const userIsLogged = require('../app/middleware/custom_middleware');
 
-router.get('/', homeController.index);
+router.get('/', userIsLogged, homeController.index);
 
 module.exports = router;

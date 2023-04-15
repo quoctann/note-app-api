@@ -6,6 +6,7 @@
 
 const User = require('../models/user_model');
 const bcrypt = require('bcryptjs');
+const session = require('express-session');
 const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -134,6 +135,8 @@ class UserController {
               // Valid user
               req.session.userId = user.uid;
               req.session.username = user.username;
+              session.userId = user.uid;
+              session.userObjectId = user._id;
               res.redirect('/');
             } else {
               // Un-valid user

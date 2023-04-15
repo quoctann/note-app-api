@@ -6,6 +6,8 @@
 
 const Note = require('../models/note_model');
 const Topic = require('../models/topic_model');
+const User = require('../models/user_model');
+const {body, validationResult} = require('express-validator');
 
 /**
  * Topic controller
@@ -40,39 +42,43 @@ class TopicController {
    * @param {*} next Next
    * @return {*} Return value
    */
-  getAll(req, res, next) {
-    // HTTP Not Modified
-    return res.status(304);
+  async getAll(req, res, next) {
+    const userData = await User.findOne({uid: req.session.userId}, 'uid topics')
+        .populate('topics');
+    return res.status(200).json(userData);
   }
 
   /**
- * METHOD
- * @param {*} req Request
- * @param {*} res Respond
- * @param {*} next Next
+ * [POST] Create single, simple Topic document (title, description)
+ * @param {*} req Body should contains "title", "description"
+ * @param {*} res HTTP 200 and Topic json data if success, otherwise HTTP 400
+ * @param {*} next Next middleware
  */
-  createSimpleTopic(req, res, next) {
-    const {title, description} = {
-      title: req.body.title,
-      description: req.body.description};
+  async createSimpleTopic(req, res, next) {
+    try {
+      const {title, description} = {
+        title: req.body.title,
+        description: req.body.description};
 
-    const topic = new Topic({
-      title: title,
-      description: description,
-    });
+      const topic = new Topic({
+        title: title,
+        description: description,
+      });
 
-    topic.save()
-        .then(() => res.status(201).json(topic))
-        .catch((error) => {
-          console.log(error);
-          return res.status(400);
-        });
+      const resultTopic = await topic.save();
 
-    if (req.body.topics) {
-      // Create note with topics
+      // Update user topics list for get all by users
+      const user = await User.findOne({uid: req.session.userId}).exec();
+      await User.findByIdAndUpdate(
+          user._id,
+          {$addToSet: {topics: resultTopic._id}},
+          {new: true, useFindAndModify: false},
+      );
 
-    } else {
-
+      res.status(201).json(topic);
+    } catch (error) {
+      console.log(error);
+      return res.status(400);
     }
   }
 
@@ -100,7 +106,14 @@ class TopicController {
       return res.status(400);
     }
   }
-  // get notes by topic id
+
+  /**
+   * [GET] Get all relative notes by given topics data (populate data)
+   * @param {*} req Get request
+   * @param {*} res Response that contains json data depending on Topic _id
+   * @param {*} next Nex middleware
+   * @return {*} HTTP 200 and json data if success, otherwise HTTP 400
+   */
   async getTopicWithPopulate(req, res, next) {
     const value = await Topic.findById(req.query.topicId).populate('notes');
     if (value) {
@@ -109,6 +122,7 @@ class TopicController {
       return res.status(400);
     }
   }
+
   /**
  * METHOD
  * @param {*} req Request
