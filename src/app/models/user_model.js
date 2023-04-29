@@ -11,8 +11,8 @@ const User = new Schema({
   uid: {type: String, default: shortid.generate},
   username: {type: String, maxLength: 255, required: true},
   password: {type: String, maxLength: 255, required: true},
-  notes: {type: mongoose.Schema.Types.ObjectId, ref: 'Note'},
-  topics: {type: mongoose.Schema.Types.ObjectId, ref: 'Topic'},
+  notes: [{type: mongoose.Schema.Types.ObjectId, ref: 'Note'}],
+  topics: [{type: mongoose.Schema.Types.ObjectId, ref: 'Topic'}],
 });
 
 module.exports = mongoose.model('User', User);

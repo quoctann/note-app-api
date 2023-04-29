@@ -9,7 +9,7 @@ const Schema = mongoose.Schema;
 const Note = new Schema({
   title: {type: String, required: true},
   content: {type: String, required: true},
-  topics: {type: mongoose.Schema.Types.ObjectId, ref: 'Topic'},
+  topics: [{type: mongoose.Schema.Types.ObjectId, ref: 'Topic'}],
   user: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
 }, {
   timestamps: true,

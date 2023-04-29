@@ -4,6 +4,10 @@
  * Use controller to handle client requests.
  */
 
+const User = require('../models/user_model');
+const Note = require('../models/note_model');
+const Topic = require('../models/topic_model');
+
 /**
  * Home controller
  */
@@ -14,10 +18,18 @@ class HomeController {
    * @param {*} res Respond
    * @param {*} next Next
    */
-  index(req, res, next) {
+  async index(req, res, next) {
     if (req.session.userId) {
+      // Load user notes and topics
+      const userData = await User
+          .findOne({uid: req.session.userId}, 'uid topics notes')
+          .populate('notes')
+          .populate('topics')
+          .exec();
+
       // Already logged in
-      res.render('main_app', {username: req.session.username, isLogin: true});
+      res.render('main_app',
+          {username: req.session.username, isLogin: true, data: userData});
     } else {
       res.render('login', {title: 'Express', isLogin: false});
     }

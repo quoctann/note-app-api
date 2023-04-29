@@ -4,6 +4,7 @@
  * Use controller to handle client requests.
  */
 
+const mongoose = require('mongoose');
 const Note = require('../models/note_model');
 const Topic = require('../models/topic_model');
 const User = require('../models/user_model');
@@ -64,15 +65,21 @@ class NoteController {
         user: user,
       });
 
-      // Create note with relative user
-      await note.save();
+      // Create documents with transaction
+      const conn = await mongoose.connection;
+      const dbSession = await conn.startSession();
+      await dbSession.withTransaction(async () => {
+        // Create note with relative user
+        await note.save();
 
-      // Update user note list also
-      await User.findByIdAndUpdate(
-          user._id,
-          {$addToSet: {notes: note._id}},
-          {new: true, useFindAndModify: false},
-      );
+        // Update user note list also
+        await User.findByIdAndUpdate(
+            user._id,
+            {$addToSet: {notes: note._id}},
+            {new: true, useFindAndModify: false},
+        );
+      });
+      dbSession.endSession();
 
       return res.status(201).redirect('/');
     } catch (error) {
