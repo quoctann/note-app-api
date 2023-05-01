@@ -55,6 +55,8 @@ class NoteController {
             .json({message: 'User not found, internal error'});
       }
 
+      const relatedTopics = req.body['related-topics'];
+
       const {title, content} = {
         title: req.body.title,
         content: req.body.content};
@@ -63,6 +65,7 @@ class NoteController {
         title: title,
         content: content,
         user: user,
+        topics: relatedTopics,
       });
 
       // Create documents with transaction
@@ -78,6 +81,17 @@ class NoteController {
             {$addToSet: {notes: note._id}},
             {new: true, useFindAndModify: false},
         );
+
+        // Update relative note list also
+        // filter - update
+        await Topic.updateMany({
+          '_id': {$in: relatedTopics},
+        }, {
+          $addToSet: {notes: note._id},
+        }, {
+          new: true,
+          useFindAndModify: false,
+        });
       });
       dbSession.endSession();
 
@@ -102,15 +116,23 @@ class NoteController {
   }
 
   /**
-   * METHOD
+   * [DELETE] Delete a note document by Object ID
    * @param {*} req Request
    * @param {*} res Respond
    * @param {*} next Next
    * @return {*} Return value
    */
-  delete(req, res, next) {
-    // HTTP Not Modified
-    return res.status(304);
+  async delete(req, res, next) {
+    try {
+      if (!req.params) {
+        return res.status(400).json({message: 'Bad request, no params passed'});
+      }
+      // Hard delete a document by this Object ID
+      await Note.deleteOne({_id: req.params.id});
+      return res.status(200).json({message: 'Note removed'});
+    } catch (error) {
+      return res.status(500).json({message: 'An error occur', err: error});
+    }
   }
 }
 

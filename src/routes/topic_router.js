@@ -21,7 +21,7 @@ const userIsLogged = require('../app/middleware/custom_middleware');
 // router.get('/', topicController.index);
 router.post('/create-single', topicController.createSimpleTopic);
 router.post('/add-note', topicController.addNoteToTopic);
-router.get('/', topicController.getTopicWithPopulate);
+router.get('/', userIsLogged, topicController.getTopicWithPopulate);
 // router.get('/all', validateGetAll(), topicController.getAll);
 router.get('/all', userIsLogged, topicController.getAll);
 

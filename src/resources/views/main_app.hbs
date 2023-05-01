@@ -25,9 +25,16 @@
               </div>
               <div id="note-content-help" class="form-text">Helper text here</div>
             </div>
-            {{!-- Hidden input for user uid --}}
-            {{!-- <input type="hidden" value="{{session.userId}}"> --}}
-            {{!-- TODO: list topic here for select, GET data when rendering --}}
+            {{!-- List user input here --}}
+            <div class="mb-3">
+              <select class="form-select" name="related-topics" multiple>
+                <option selected>Select topics (hold Ctrl key for multiple)</option>
+                {{#each data.topics}}
+                <option value="{{_id}}" id=`topic-{{_id}}`>{{title}}</option>
+                {{/each}}
+              </select>
+            </div>
+            {{!-- Button control --}}
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
               <button type="submit" class="btn btn-primary">Save changes</button>
@@ -94,7 +101,7 @@
         {{#each data.topics}}
         <li class="list-group-item d-flex justify-content-between align-items-start">
           <div class="ms-2 me-auto">
-            <div class="fw-bold"><a href="#">{{title}}</a></div>
+            <div class="fw-bold"><a href="#" onclick="filterByTopicId(`{{_id}}`)">{{title}}</a></div>
             {{description}}
           </div>
           <span class="badge bg-primary rounded-pill">999</span>
@@ -108,14 +115,15 @@
       <div class="row">
         {{!-- Sample item --}}
         {{#each data.notes}}
-        <div class="item col-sm-6 col-lg-4 mb-3">
+        <div class="item col-sm-6 col-lg-4 mb-3" id="{{_id}}">
           <div class="card">
             <div class="card-body">
               <h5 class="card-title">{{title}}</h5>
               <p class="card-text">{{content}}</p>
               <p class="card-text"><i class="fa-regular fa-calendar"></i> {{createdAt}}</p>
-              <a href="#" class="btn btn-primary"><i class="fa-solid fa-edit"></i> Edit</a>
-              <a href="#" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Trash</a>
+              <a href="#" class="btn btn-primary" id="btnEditNote" data-note-id="{{_id}}"><i class="fa-solid fa-edit"></i> Edit</a>
+              <a href="#" class="btn btn-danger" id="btnTrashNote" data-note-id="{{_id}}" 
+                  onclick="removeNote(`{{_id}}`)"><i class="fa-solid fa-trash"></i> Trash</a>
             </div>
           </div>
         </div>
@@ -127,3 +135,52 @@
   {{!-- End displaying area --}}
 
 </div>
+
+<script>
+  // Perform delete note, send request into server
+  function removeNote(noteObjectId) {    
+    let isForSureDelete = confirm(`Are you sure delete this note, this action can't be undo`);
+    
+    if (isForSureDelete) {
+      $.ajax({
+        url: '/note/' + noteObjectId,
+        method: 'DELETE',
+        success: function(data) {
+          alert('Note removed');      
+          document.getElementById(noteObjectId).remove();
+        },
+        error: function(data) {       
+          alert('Error');
+          console.log('An error occur', data);
+        },
+        complete: function(data) {
+          console.log(data);
+        },
+      });
+    };    
+  };
+
+  // Filter notes by topics
+  function filterByTopicId(topicObjId) {
+    // Validate information
+    if (null === topicObjId || undefined === topicObjId || "" === topicObjId) {
+      return;
+    }
+
+    $.ajax({
+      url: '/topic?topicId=' + topicObjId,
+      method: 'GET',
+      success: function(data) {
+        console.log(data);
+      },
+      error: function(data) {       
+        alert('Error');
+        console.log('An error occur', data);
+      },
+      complete: function(data) {
+        // console.log(data);
+      },
+    });
+  };
+
+</script>

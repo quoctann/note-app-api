@@ -109,17 +109,22 @@ class TopicController {
 
   /**
    * [GET] Get all relative notes by given topics data (populate data)
-   * @param {*} req Get request
+   * @param {*} req Request contains query: topicId = Topic Object ID
    * @param {*} res Response that contains json data depending on Topic _id
    * @param {*} next Nex middleware
    * @return {*} HTTP 200 and json data if success, otherwise HTTP 400
    */
   async getTopicWithPopulate(req, res, next) {
-    const value = await Topic.findById(req.query.topicId).populate('notes');
-    if (value) {
-      return res.status(201).json(value);
-    } else {
-      return res.status(400);
+    try {
+      const value = await Topic.findById(req.query.topicId).populate('notes');
+      if (value) {
+        return res.status(201).json(value);
+      } else {
+        return res.status(400).json({message: 'An error occurred'});
+      }
+    } catch (error) {
+      return res.status(500)
+          .json({message: 'Un-expected error occurred', error: error});
     }
   }
 
