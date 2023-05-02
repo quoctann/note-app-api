@@ -13,5 +13,6 @@ const userIsLogged = require('../app/middleware/custom_middleware');
 router.get('/', noteController.index);
 router.post('/create', userIsLogged, noteController.create);
 router.delete('/:id', userIsLogged, noteController.delete);
+router.put('/:id', userIsLogged, noteController.update);
 
 module.exports = router;

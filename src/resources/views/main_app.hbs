@@ -3,7 +3,7 @@
 
   {{!-- Create note form modal--}}
   <div class="modal fade" id="createNoteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">      
+    <div class="modal-dialog modal-lg">      
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5" id="exampleModalLabel">Create note</h1>
@@ -45,9 +45,53 @@
     </div>    
   </div>
 
+  {{!-- Update note modal --}}
+  <div class="modal fade" id="updateNoteModal" tabindex="-1" aria-labelledby="updateNoteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">      
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="updateNoteModalLabel">Update note</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          {{!-- Update note data --}}
+          <form action="/note/update" method="POST" id="form-update-note">
+            <div class="mb-3">
+              <label for="note-title" class="form-label">Note title</label>
+              <input type="text" class="form-control" id="update-note-title" name="title">
+            </div>            
+            <div class="mb-3">
+              <label for="note-content" class="form-label">Note content</label>
+              <div class="form-floating">
+                <textarea rows="20" class="form-control" placeholder="Leave a comment here" id="update-note-content" name="content"></textarea>
+              </div>
+              <div id="note-content-help" class="form-text">Helper text here</div>
+            </div>
+            {{!-- List user input here --}}
+            <div class="mb-3">
+              <select class="form-select" name="update-related-topics" id="update-related-topics" multiple>
+                <option selected>Select topics (hold Ctrl key for multiple)</option>
+                {{#each data.topics}}
+                <option value="{{_id}}" id=`topic-{{_id}}`>{{title}}</option>
+                {{/each}}
+              </select>
+            </div>
+            {{!-- Hidden input for Note ObjectID --}}
+            <input type="hidden" name="id" id="update-note-object-id" value="">
+            {{!-- Button control --}}
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+          </form>
+        </div>        
+      </div>
+    </div>    
+  </div>
+
   {{!-- Create topic form modal --}}
   <div class="modal fade" id="createTopicModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">      
+    <div class="modal-dialog modal-lg">      
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5" id="exampleModalLabel">Create topic</h1>
@@ -98,12 +142,21 @@
     <div class="col-4 left-side p-3">
       <ul class="list-group">
         {{!-- Sample item --}}
+        <li class="list-group-item d-flex justify-content-between align-items-start">
+          <div class="ms-2 me-auto">
+            <div class="fw-bold"><a href="#" id="menu-topic-all" onclick="filterByTopicId('all')">All</a></div>
+            Get all notes
+          </div>
+          <span class="badge bg-primary rounded-pill">999</span>
+        </li>
+
         {{#each data.topics}}
         <li class="list-group-item d-flex justify-content-between align-items-start">
           <div class="ms-2 me-auto">
-            <div class="fw-bold"><a href="#" onclick="filterByTopicId(`{{_id}}`)">{{title}}</a></div>
+            <div class="fw-bold"><a href="#" id="menu-topic-{{_id}}" onclick="filterByTopicId('{{_id}}')">{{title}}</a></div>
             {{description}}
           </div>
+          <span class="badge bg-success rounded-pill mx-3"><a href="#" class="link-light">Edit</a></span>
           <span class="badge bg-primary rounded-pill">999</span>
         </li>
         {{/each}}
@@ -112,7 +165,7 @@
 
     {{!-- Right side contains notes list --}}
     <div class="col-8 right-side p-3">
-      <div class="row">
+      <div class="row" id="note-container">
         {{!-- Sample item --}}
         {{#each data.notes}}
         <div class="item col-sm-6 col-lg-4 mb-3" id="{{_id}}">
@@ -121,7 +174,17 @@
               <h5 class="card-title">{{title}}</h5>
               <p class="card-text">{{content}}</p>
               <p class="card-text"><i class="fa-regular fa-calendar"></i> {{createdAt}}</p>
-              <a href="#" class="btn btn-primary" id="btnEditNote" data-note-id="{{_id}}"><i class="fa-solid fa-edit"></i> Edit</a>
+              <a href="#" 
+                  class="btn btn-primary" 
+                  id="btnEditNote"
+                  data-bs-toggle="modal" 
+                  data-bs-target="#updateNoteModal"
+                  data-title="{{title}}"
+                  data-content="{{content}}"
+                  data-id="{{_id}}"
+                  data-related-topic="{{topics}}">                  
+                <i class="fa-solid fa-edit"></i> Edit
+              </a>
               <a href="#" class="btn btn-danger" id="btnTrashNote" data-note-id="{{_id}}" 
                   onclick="removeNote(`{{_id}}`)"><i class="fa-solid fa-trash"></i> Trash</a>
             </div>
@@ -136,51 +199,4 @@
 
 </div>
 
-<script>
-  // Perform delete note, send request into server
-  function removeNote(noteObjectId) {    
-    let isForSureDelete = confirm(`Are you sure delete this note, this action can't be undo`);
-    
-    if (isForSureDelete) {
-      $.ajax({
-        url: '/note/' + noteObjectId,
-        method: 'DELETE',
-        success: function(data) {
-          alert('Note removed');      
-          document.getElementById(noteObjectId).remove();
-        },
-        error: function(data) {       
-          alert('Error');
-          console.log('An error occur', data);
-        },
-        complete: function(data) {
-          console.log(data);
-        },
-      });
-    };    
-  };
-
-  // Filter notes by topics
-  function filterByTopicId(topicObjId) {
-    // Validate information
-    if (null === topicObjId || undefined === topicObjId || "" === topicObjId) {
-      return;
-    }
-
-    $.ajax({
-      url: '/topic?topicId=' + topicObjId,
-      method: 'GET',
-      success: function(data) {
-        console.log(data);
-      },
-      error: function(data) {       
-        alert('Error');
-        console.log('An error occur', data);
-      },
-      complete: function(data) {
-        // console.log(data);
-      },
-    });
-  };
-
-</script>
+<script src="/script/mainApp.js"></script>

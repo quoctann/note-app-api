@@ -104,7 +104,7 @@ class NoteController {
   }
 
   /**
-   * METHOD
+   * [POST] Update single note by Note ObjectID
    * @param {*} req Request
    * @param {*} res Respond
    * @param {*} next Next
