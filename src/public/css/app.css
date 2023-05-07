@@ -1,0 +1,11 @@
+/*
+ * .src/resources/scss/app.scss
+ * This file define styling on views.
+ * This script will build to ./src/public/css
+ * as configuration on package.json
+ */
+* {
+  font-family: "Be Vietnam Pro", Arial, Helvetica, sans-serif;
+}
+
+/*# sourceMappingURL=app.css.map */
