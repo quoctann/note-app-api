@@ -24,5 +24,6 @@ router.post('/add-note', topicController.addNoteToTopic);
 router.get('/', userIsLogged, topicController.getTopicWithPopulate);
 // router.get('/all', validateGetAll(), topicController.getAll);
 router.get('/all', userIsLogged, topicController.getAll);
+router.put('/:id', topicController.update);
 
 module.exports = router;

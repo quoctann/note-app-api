@@ -18,12 +18,7 @@
             </div>            
             <div class="mb-3">
               <label for="note-content" class="form-label">Note content</label>
-              {{!-- <input type="text" class="form-control" id="note-content" aria-describedby="note-content-help" name="content"> --}}
-              <div class="form-floating">
-                <textarea rows="20" class="form-control" placeholder="Leave a comment here" id="floatingTextarea" name="content"></textarea>
-                <label for="floatingTextarea">How do you feel today? ⛅</label>
-              </div>
-              <div id="note-content-help" class="form-text">Helper text here</div>
+              <textarea rows="10" class="form-control" placeholder="Enter content here" id="floatingTextarea" name="content"></textarea>
             </div>
             {{!-- List user input here --}}
             <div class="mb-3">
@@ -55,17 +50,14 @@
         </div>
         <div class="modal-body">
           {{!-- Update note data --}}
-          <form action="/note/update" method="POST" id="form-update-note">
+          <form id="form-update-note">
             <div class="mb-3">
               <label for="note-title" class="form-label">Note title</label>
               <input type="text" class="form-control" id="update-note-title" name="title">
             </div>            
             <div class="mb-3">
               <label for="note-content" class="form-label">Note content</label>
-              <div class="form-floating">
-                <textarea rows="20" class="form-control" placeholder="Leave a comment here" id="update-note-content" name="content"></textarea>
-              </div>
-              <div id="note-content-help" class="form-text">Helper text here</div>
+              <textarea rows="10" class="form-control" placeholder="Enter content here" id="update-note-content" name="content"></textarea>
             </div>
             {{!-- List user input here --}}
             <div class="mb-3">
@@ -106,13 +98,38 @@
             </div>            
             <div class="mb-3">
               <label for="topic-content" class="form-label">Description</label>
-              <div class="form-floating">
-                <textarea rows="20" class="form-control" placeholder="Leave a comment here" id="floatingTextarea" name="description"></textarea>
-                <label for="floatingTextarea">More productivity right? 💪</label>
-              </div>
-              <div id="topic-content-help" class="form-text">Helper text here</div>
+              <textarea rows="10" class="form-control" placeholder="Enter description here" name="description"></textarea>
             </div>
-            {{!-- TODO: list user notes here for select, GET data when rendering --}}
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+          </form>
+        </div>        
+      </div>
+    </div>    
+  </div>
+
+  {{!-- Update topic form modal --}}
+  <div class="modal fade" id="updateTopicModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">      
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Update topic</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          {{!-- Update topic data --}}
+          <form id="form-update-topic">
+            <div class="mb-3">
+              <label for="topic-title" class="form-label">Title</label>
+              <input type="text" class="form-control" id="update-topic-title" name="title">
+            </div>            
+            <div class="mb-3">
+              <label class="form-label">Description</label>
+              <textarea id="update-topic-description" rows="10" class="form-control" placeholder="Enter description here" name="description"></textarea>
+            </div>
+            <input type="hidden" name="id" id="update-topic-object-id" value="">
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
               <button type="submit" class="btn btn-primary">Save changes</button>
@@ -139,7 +156,7 @@
   {{!-- Displaying content area --}}
   <div class="row">
     {{!-- Left side contains topics list --}}
-    <div class="col-4 left-side p-3">
+    <div class="col-sm-6 col-md-4 left-side p-3">
       <ul class="list-group">
         {{!-- Sample item --}}
         <li class="list-group-item d-flex justify-content-between align-items-start">
@@ -147,7 +164,7 @@
             <div class="fw-bold"><a href="#" id="menu-topic-all" onclick="filterByTopicId('all')">All</a></div>
             Get all notes
           </div>
-          <span class="badge bg-primary rounded-pill">999</span>
+          {{!-- <span class="badge bg-primary rounded-pill">999</span> --}}
         </li>
 
         {{#each data.topics}}
@@ -156,24 +173,43 @@
             <div class="fw-bold"><a href="#" id="menu-topic-{{_id}}" onclick="filterByTopicId('{{_id}}')">{{title}}</a></div>
             {{description}}
           </div>
-          <span class="badge bg-success rounded-pill mx-3"><a href="#" class="link-light">Edit</a></span>
-          <span class="badge bg-primary rounded-pill">999</span>
+          <span class="badge bg-success rounded-pill mx-3">
+            <a 
+              id="btn-edit-topic"
+              href="#"
+              class="link-light"
+              data-bs-toggle="modal"
+              data-bs-target="#updateTopicModal"
+              data-title="{{title}}"
+              data-description="{{description}}"
+              data-id="{{_id}}"
+            >Edit</a>
+          </span>
+          <span class="badge bg-primary rounded-pill">{{arrayLength notes}}</span>
         </li>
         {{/each}}
       <ul/>
     </div>
 
     {{!-- Right side contains notes list --}}
-    <div class="col-8 right-side p-3">
+    <div class="col-sm-6 col-md-8 right-side p-3">
       <div class="row" id="note-container">
         {{!-- Sample item --}}
         {{#each data.notes}}
-        <div class="item col-sm-6 col-lg-4 mb-3" id="{{_id}}">
+        <div class="item col-sm-12 col-md-6 mb-3" id="{{_id}}">
           <div class="card">
             <div class="card-body">
               <h5 class="card-title">{{title}}</h5>
               <p class="card-text">{{content}}</p>
-              <p class="card-text"><i class="fa-regular fa-calendar"></i> {{createdAt}}</p>
+              <p class="card-text">
+                Topics: 
+                {{#each topics}}
+                <span class="badge rounded-pill my-1 {{randomLightTheme 'bg'}}">
+                  <a href="#" class="text-decoration-none link-light" onclick="filterByTopicId('{{_id}}')">{{title}}</a>
+                </span>
+                {{/each}}
+              </p>
+              <p class="card-text"><i class="fa-regular fa-calendar"></i> {{moment createdAt}}</p>
               <a href="#" 
                   class="btn btn-primary" 
                   id="btnEditNote"
@@ -182,9 +218,9 @@
                   data-title="{{title}}"
                   data-content="{{content}}"
                   data-id="{{_id}}"
-                  data-related-topic="{{topics}}">                  
+                  data-related-topic="{{normalizePopulatedTopics topics}}">                  
                 <i class="fa-solid fa-edit"></i> Edit
-              </a>
+              </a>              
               <a href="#" class="btn btn-danger" id="btnTrashNote" data-note-id="{{_id}}" 
                   onclick="removeNote(`{{_id}}`)"><i class="fa-solid fa-trash"></i> Trash</a>
             </div>
@@ -199,4 +235,5 @@
 
 </div>
 
-<script src="/script/mainApp.js"></script>
+{{!-- Ajax script --}}
+<script src="/script/main_app.js"></script>

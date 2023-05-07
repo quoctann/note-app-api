@@ -1,3 +1,35 @@
+/* eslint-disable max-len */
+
+/**
+ * Use moment.js to make readable date time string
+ * @param {string} timestamps Timestamps string get from database
+ * @return {string} Formatted string
+ */
+function renderMoment(timestamps) {
+  moment.locale('vi');
+  const aWeekAgo = moment().subtract(7, 'days').startOf('day');
+  // If within a week, rendering a 'sometimes from now' date string
+  if (moment(timestamps).isAfter(aWeekAgo)) {
+    return moment(timestamps).fromNow();
+  } else {
+    return moment(timestamps).format('DD/MMM/YYYY HH:MM');
+  };
+}
+
+/**
+   * Generate random Bootstrap 5 theme color HTML class name
+   * @param {*} prefix Prefix of Bootstrap component
+   * @return {*} Class name that will affected on UI
+   */
+function randomBootstrapTheme(prefix) {
+  const bootstrapTheme = ['primary', 'secondary', 'success', 'danger',
+    'warning', 'info', 'dark'];
+    // eslint-disable-next-line max-len
+  const randomIdx = Math.floor(Math.random() * (bootstrapTheme.length - 0) + 0);
+
+  return prefix + '-' + bootstrapTheme[randomIdx];
+}
+
 /**
  * Perform delete note, send request into server
  * @param {*} noteObjectId Note ObjectID
@@ -55,7 +87,23 @@ function filterByTopicId(topicObjId) {
       }
 
       let filteredData = ``;
+
       data.notes.forEach((note) => {
+        let idList = '';
+        let badgeTopicItems = ``;
+        const formattedDate = renderMoment(note.createdAt);
+
+        note.topics.forEach((topic) => {
+          idList += topic._id + ',';
+          const theme = randomBootstrapTheme('bg');
+          badgeTopicItems += `
+            <span class="badge rounded-pill my-1 ${theme}">
+              <a href="#" class="text-decoration-none link-light"
+                onclick="filterByTopicId('${topic._id}')">${topic.title}</a>
+            </span>
+          `;
+        });
+
         const noteElement = `
             <div class="item col-sm-6 col-lg-4 mb-3" id="${note._id}">
               <div class="card">
@@ -63,17 +111,21 @@ function filterByTopicId(topicObjId) {
                 <h5 class="card-title">${note.title}</h5>
                 <p class="card-text">${note.content}</p>
                 <p class="card-text">
-                  <i class="fa-regular fa-calendar"></i> ${note.createdAt}
+                  Topics:
+                  ${badgeTopicItems}
+                </p>
+                <p class="card-text">
+                  <i class="fa-regular fa-calendar"></i> ${formattedDate}
                 </p>
                 <a href="#" 
                   class="btn btn-primary" 
-                  id="btnEditNote"
+                  id="btn-edit-note"
                   data-bs-toggle="modal" 
                   data-bs-target="#updateNoteModal"
                   data-title="${note.title}"
                   data-content="${note.content}"
                   data-id="${note._id}"
-                  data-related-topic="${note.topics}">                  
+                  data-related-topic="${idList}">                  
                   <i class="fa-solid fa-edit"></i> Edit
                 </a>
                 <a href="#"
@@ -102,7 +154,7 @@ function filterByTopicId(topicObjId) {
 }
 
 // Handle click for toggle edit note button, this method is more elegant
-$(document).on('click', '#btnEditNote', function() {
+$(document).on('click', '#btn-edit-note', function() {
   const objId = $(this).data('id');
   const title = $(this).data('title');
   const content = $(this).data('content');
@@ -116,26 +168,60 @@ $(document).on('click', '#btnEditNote', function() {
   $('#updateNoteModal #update-note-object-id').val(objId);
 });
 
-// TODO: Modify this code here to update single document
-// Manual update note (POST)
+// Handle click for toggle edit topic button, this method is more elegant
+$(document).on('click', '#btn-edit-topic', function() {
+  const objId = $(this).data('id');
+  const title = $(this).data('title');
+  const description = $(this).data('description');
+
+  // Fill data into update modal
+  $('#updateTopicModal #update-topic-description').val(description);
+  $('#updateTopicModal #update-topic-title').val(title);
+  $('#updateTopicModal #update-topic-object-id').val(objId);
+});
+
+// Update single Note
 $(document).ready(function() {
   $('#form-update-note').submit(function(event) {
-    const formData = {
-      name: $('#name').val(),
-      email: $('#email').val(),
-      superheroAlias: $('#superheroAlias').val(),
-    };
+    event.preventDefault();
+    const formData = $('#form-update-note').serialize();
+    const noteObjectId = $('#update-note-object-id').val();
 
     $.ajax({
-      type: 'PUT',
-      url: '/note/update/' + 'ID UPDATE LATER HERE',
+      url: '/note/' + noteObjectId,
+      method: 'PUT',
       data: formData,
-      dataType: 'json',
-      encode: true,
-    }).done(function(data) {
-      console.log(data);
+      success: function(data) {
+        alert('Updated');
+        filterByTopicId('all');
+      },
+      error: function(data) {
+        alert('Error');
+        console.log('An error occur\n', data);
+      },
     });
+  });
+});
 
+// Update single Topic
+$(document).ready(function() {
+  $('#form-update-topic').submit(function(event) {
     event.preventDefault();
+    const formData = $('#form-update-topic').serialize();
+    const topicObjectId = $('#update-topic-object-id').val();
+
+    $.ajax({
+      url: '/topic/' + topicObjectId,
+      method: 'PUT',
+      data: formData,
+      success: function(data) {
+        alert('Updated');
+        filterByTopicId('all');
+      },
+      error: function(data) {
+        alert('Error');
+        console.log('An error occur\n', data);
+      },
+    });
   });
 });

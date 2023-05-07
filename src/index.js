@@ -21,11 +21,16 @@ const db = require('./config/database');
 // Instance of Express
 const app = express();
 
+// Customize Handlebars helper
+const hbsCustomHelper = require('./helper/handlebars_helper');
+
 // View engine setup (use Handlebars)
 hbs.registerPartials(
     path.join(__dirname, 'resources', 'views', 'partials'), function(err) { });
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'resources', 'views'));
+
+hbsCustomHelper.register();
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -33,14 +38,14 @@ app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '/public')));
 
-// Connect to database (MongoDB)
+// Connect to database (MongoDB via mongoose)
 db.connect();
 
-// decode or encode session
+// Decode or encode session
 app.use(session({
   secret: 'Any normal Word',
-  resave: false,
-  saveUninitialized: false,
+  resave: true,
+  saveUninitialized: true,
   cookie: {
     maxAge: 2*60*1000,
   },

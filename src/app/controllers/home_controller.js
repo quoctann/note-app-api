@@ -23,10 +23,22 @@ class HomeController {
       // Load user notes and topics
       const userData = await User
           .findOne({uid: req.session.userId}, 'uid topics notes')
-          .populate('notes')
-          .populate('topics')
+          .populate({
+            path: 'notes',
+            populate: {
+              path: 'topics',
+              select: {'_id': 1, 'title': 1},
+            },
+          })
+          .populate({
+            path: 'topics',
+            populate: {
+              path: 'notes',
+              select: {'_id': 1},
+            },
+          })
           .exec();
-
+      // console.log(userData);
       // Already logged in
       res.render('main_app',
           {username: req.session.username, isLogin: true, data: userData});

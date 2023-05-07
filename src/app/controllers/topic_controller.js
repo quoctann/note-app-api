@@ -7,7 +7,6 @@
 const Note = require('../models/note_model');
 const Topic = require('../models/topic_model');
 const User = require('../models/user_model');
-const {body, validationResult} = require('express-validator');
 
 /**
  * Topic controller
@@ -75,10 +74,10 @@ class TopicController {
           {new: true, useFindAndModify: false},
       );
 
-      res.status(201).json(topic);
+      return res.redirect('/');
     } catch (error) {
       console.log(error);
-      return res.status(400);
+      return res.redirect('/');
     }
   }
 
@@ -116,7 +115,15 @@ class TopicController {
    */
   async getTopicWithPopulate(req, res, next) {
     try {
-      const value = await Topic.findById(req.query.topicId).populate('notes');
+      const value = await Topic
+          .findById(req.query.topicId)
+          .populate({
+            path: 'notes',
+            populate: {
+              path: 'topics',
+              select: {'_id': 1, 'title': 1},
+            },
+          });
       if (value) {
         return res.status(201).json(value);
       } else {
@@ -129,15 +136,23 @@ class TopicController {
   }
 
   /**
- * METHOD
+ * [PUT] Update single topic
  * @param {*} req Request
  * @param {*} res Respond
  * @param {*} next Next
  * @return {*} Return value
  */
-  update(req, res, next) {
-  // HTTP Not Modified
-    return res.status(304);
+  async update(req, res, next) {
+    try {
+      const objId = req.params.id;
+      const topic = await Topic.findById(objId);
+      topic.title = req.body['title'];
+      topic.description = req.body['description'];
+      await topic.save();
+      return res.status(204).json({message: 'Updated'});
+    } catch (error) {
+      return res.status(500).json({message: 'An error occurred'});
+    }
   }
 
   /**

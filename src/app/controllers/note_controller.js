@@ -110,9 +110,51 @@ class NoteController {
    * @param {*} next Next
    * @return {*} Return value
    */
-  update(req, res, next) {
-    // HTTP Not Modified
-    return res.status(304);
+  async update(req, res, next) {
+    try {
+      // console.log(req.body);
+      const objId = req.params.id;
+      const note = await Note.findById(objId);
+      const topicsBefore = note.topics;
+
+      note.title = req.body['title'];
+      note.content = req.body['content'];
+      note.topics = req.body['update-related-topics'];
+
+      // Create documents with transaction
+      const conn = mongoose.connection;
+      const dbSession = await conn.startSession();
+      await dbSession.withTransaction(async () => {
+        // Save note into database
+        await note.save();
+
+        // Add relative note list also
+        await Topic.updateMany({
+          '_id': {$in: note.topics},
+        }, {
+          $addToSet: {notes: note._id},
+        }, {
+          new: true,
+          useFindAndModify: false,
+        });
+
+        // And remove un-related anymore
+        await Topic.updateMany({
+          '_id': {$in: topicsBefore},
+        }, {
+          $pull: {notes: note._id},
+        }, {
+          new: true,
+          useFindAndModify: false,
+        });
+      });
+      dbSession.endSession();
+
+      return res.status(204).json({message: 'Updated'});
+    } catch (error) {
+      return res.status(500)
+          .json({message: 'An error occurred', detail: error});
+    }
   }
 
   /**
