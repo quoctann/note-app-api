@@ -25,5 +25,6 @@ router.get('/', userIsLogged, topicController.getTopicWithPopulate);
 // router.get('/all', validateGetAll(), topicController.getAll);
 router.get('/all', userIsLogged, topicController.getAll);
 router.put('/:id', topicController.update);
+router.delete('/:id', topicController.delete);
 
 module.exports = router;
