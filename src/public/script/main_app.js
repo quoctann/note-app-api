@@ -225,3 +225,21 @@ $(document).ready(function() {
     });
   });
 });
+
+// Handle click for delete topic button
+$(document).on('click', '#btn-delete-topic', function() {
+  const objId = $(this).data('id');
+  console.log(objId);
+  $.ajax({
+    url: '/topic/' + objId,
+    method: 'DELETE',
+    success: function(data) {
+      alert('Updated');
+      filterByTopicId('all');
+    },
+    error: function(data) {
+      alert('Error');
+      console.log('An error occur\n', data);
+    },
+  });
+});

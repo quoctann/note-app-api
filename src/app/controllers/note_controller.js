@@ -55,21 +55,30 @@ class NoteController {
             .json({message: 'User not found, internal error'});
       }
 
-      const relatedTopics = req.body['related-topics'];
+      const relatedTopics = [];
+      // Check if incoming string is not an array of MongoDB ObjectID,
+      const requestTopics = (req.body['related-topics'].toString()).split(',');
+      requestTopics.forEach((topic) => {
+        if (mongoose.Types.ObjectId.isValid(topic)) {
+          relatedTopics.push(topic);
+        }
+      });
 
       const {title, content} = {
         title: req.body.title,
         content: req.body.content};
 
-      const note = new Note({
-        title: title,
-        content: content,
-        user: user,
-        topics: relatedTopics,
-      });
+      const note = new Note();
+      note.title = title;
+      note.content = content;
+      note.user = user;
 
-      // Create documents with transaction
-      const conn = await mongoose.connection;
+      if (relatedTopics.length > 0) {
+        note.topics = relatedTopics;
+      }
+
+      // Create document with transaction
+      const conn = mongoose.connection;
       const dbSession = await conn.startSession();
       await dbSession.withTransaction(async () => {
         // Create note with relative user
@@ -84,22 +93,23 @@ class NoteController {
 
         // Update relative note list also
         // filter - update
-        await Topic.updateMany({
-          '_id': {$in: relatedTopics},
-        }, {
-          $addToSet: {notes: note._id},
-        }, {
-          new: true,
-          useFindAndModify: false,
-        });
+        if (relatedTopics.length > 0) {
+          await Topic.updateMany({
+            '_id': {$in: relatedTopics},
+          }, {
+            $addToSet: {notes: note._id},
+          }, {
+            new: true,
+            useFindAndModify: false,
+          });
+        }
       });
       dbSession.endSession();
 
-      return res.status(201).redirect('/');
+      return res.redirect('back');
     } catch (error) {
       console.log(error);
-      return res.status('500').render('main_app',
-          {message: `Create failed \n ${error}`});
+      return res.redirect('back');
     }
   }
 
@@ -112,16 +122,28 @@ class NoteController {
    */
   async update(req, res, next) {
     try {
-      // console.log(req.body);
       const objId = req.params.id;
       const note = await Note.findById(objId);
       const topicsBefore = note.topics;
+      const relatedTopics = [];
+
+      // Check if coming string is not an array of MongoDB ObjectID,
+      const requestTopics = (req.body['update-related-topics']
+          .toString()).split(',');
+      requestTopics.forEach((topic) => {
+        if (mongoose.Types.ObjectId.isValid(topic)) {
+          relatedTopics.push(topic);
+        }
+      });
 
       note.title = req.body['title'];
       note.content = req.body['content'];
-      note.topics = req.body['update-related-topics'];
 
-      // Create documents with transaction
+      if (relatedTopics.length > 0) {
+        note.topics = relatedTopics;
+      }
+
+      // Transaction
       const conn = mongoose.connection;
       const dbSession = await conn.startSession();
       await dbSession.withTransaction(async () => {
@@ -138,9 +160,12 @@ class NoteController {
           useFindAndModify: false,
         });
 
+        const topicDiff = topicsBefore.filter((item) =>
+          note.topics.indexOf(item) === -1);
+
         // And remove un-related anymore
         await Topic.updateMany({
-          '_id': {$in: topicsBefore},
+          '_id': {$in: topicDiff},
         }, {
           $pull: {notes: note._id},
         }, {
@@ -169,8 +194,37 @@ class NoteController {
       if (!req.params) {
         return res.status(400).json({message: 'Bad request, no params passed'});
       }
-      // Hard delete a document by this Object ID
-      await Note.deleteOne({_id: req.params.id});
+
+      // Transaction
+      const conn = mongoose.connection;
+      const dbSession = await conn.startSession();
+      await dbSession.withTransaction(async () => {
+        const note = await Note.findById({_id: req.params.id});
+        // Delete on relative topics
+        await Topic.updateMany({
+          '_id': {$in: note.topics},
+        }, {
+          $pull: {notes: note._id},
+        }, {
+          new: true,
+          useFindAndModify: false,
+        });
+
+        // Delete on relative user's notes
+        await User.findByIdAndUpdate(
+            note.user,
+            {
+              $pull: {notes: note._id},
+            }, {
+              new: true,
+              useFindAndModify: false,
+            });
+
+        // Delete note
+        await note.deleteOne();
+      });
+      dbSession.endSession();
+
       return res.status(200).json({message: 'Note removed'});
     } catch (error) {
       return res.status(500).json({message: 'An error occur', err: error});

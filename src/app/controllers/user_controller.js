@@ -16,7 +16,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
  */
 class UserController {
   /**
-   * GET retrieve public user content
+   * [GET] Retrieve public user content
    * @param {*} req Request
    * @param {*} res Respond
    * @param {*} next Next
@@ -26,7 +26,7 @@ class UserController {
   }
 
   /**
-   * POST perform user login action, give them jwt to authenticate (API)
+   * [POST] Perform user login action, give them jwt to authenticate (API)
    * @param {*} req Request
    * @param {*} res Respond
    * @param {*} next Next
@@ -60,7 +60,7 @@ class UserController {
   }
 
   /**
-   * POST perform user register action
+   * [POST] Perform user register action
    * @param {*} req Request
    * @param {*} res Respond
    * @param {*} next Next
@@ -87,7 +87,7 @@ class UserController {
   }
 
   /**
-   * GET test authentication get secure resource (API)
+   * [GET] Test authentication get secure resource (API)
    * @param {*} req Request
    * @param {*} res Respond
    * @param {*} next Next
@@ -115,7 +115,7 @@ class UserController {
   }
 
   /**
- * POST Server side rendering login handler
+ * [POST] Server side rendering login handler
  * @param {*} req Request
  * @param {*} res Respond
  * @param {*} next Next
@@ -157,7 +157,7 @@ class UserController {
   }
 
   /**
- * GET logout user by delete session
+ * [GET] Logout user by delete session
  * @param {*} req Request
  * @param {*} res Respond
  * @param {*} next Next
@@ -173,7 +173,7 @@ class UserController {
   }
 
   /**
- * GET render register page
+ * [GET] Render register page
  * @param {*} req Request
  * @param {*} res Respond
  * @param {*} next Next
@@ -184,7 +184,7 @@ class UserController {
   }
 
   /**
- * GET render login page
+ * [GET] Render login page
  * @param {*} req Request
  * @param {*} res Respond
  * @param {*} next Next

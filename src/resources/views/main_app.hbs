@@ -173,7 +173,7 @@
             <div class="fw-bold"><a href="#" id="menu-topic-{{_id}}" onclick="filterByTopicId('{{_id}}')">{{title}}</a></div>
             {{description}}
           </div>
-          <span class="badge bg-success rounded-pill mx-3">
+          <span class="badge bg-success rounded-pill mx-1">
             <a 
               id="btn-edit-topic"
               href="#"
@@ -184,6 +184,14 @@
               data-description="{{description}}"
               data-id="{{_id}}"
             >Edit</a>
+          </span>
+          <span class="badge bg-danger rounded-pill mx-1">
+            <a 
+              id="btn-delete-topic"
+              href="#"
+              class="link-light"
+              data-id="{{_id}}"
+            ><i class="fa fa-trash"></i></a>
           </span>
           <span class="badge bg-primary rounded-pill">{{arrayLength notes}}</span>
         </li>
@@ -212,7 +220,7 @@
               <p class="card-text"><i class="fa-regular fa-calendar"></i> {{moment createdAt}}</p>
               <a href="#" 
                   class="btn btn-primary" 
-                  id="btnEditNote"
+                  id="btn-edit-note"
                   data-bs-toggle="modal" 
                   data-bs-target="#updateNoteModal"
                   data-title="{{title}}"

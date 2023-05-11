@@ -72,6 +72,6 @@ function register() {
   });
 };
 
-module.exports ={
+module.exports = {
   register,
 };

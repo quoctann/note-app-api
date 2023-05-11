@@ -4,6 +4,7 @@
  * Use controller to handle client requests.
  */
 
+const mongoose = require('mongoose');
 const Note = require('../models/note_model');
 const Topic = require('../models/topic_model');
 const User = require('../models/user_model');
@@ -13,7 +14,7 @@ const User = require('../models/user_model');
  */
 class TopicController {
   /**
-   * GET
+   * [GET]
    * @param {*} req Request
    * @param {*} res Respond
    * @param {*} next Next
@@ -35,7 +36,7 @@ class TopicController {
   }
 
   /**
-   * METHOD
+   * [GET] Get all topics
    * @param {*} req Request
    * @param {*} res Respond
    * @param {*} next Next
@@ -82,7 +83,7 @@ class TopicController {
   }
 
   /**
-   * POST add Note into Topic object reference for 2 way binding
+   * [POST] Add Note into Topic object reference for 2 way binding
    * @param {*} req Request
    * @param {*} res Response
    * @param {*} next Next
@@ -156,15 +157,48 @@ class TopicController {
   }
 
   /**
- * METHOD
+ * [DELETE] Delete a Topic
  * @param {*} req Request
  * @param {*} res Respond
  * @param {*} next Next
  * @return {*} Return value
  */
-  delete(req, res, next) {
-  // HTTP Not Modified
-    return res.status(304);
+  async delete(req, res, next) {
+    try {
+      const objId = req.params.id;
+      const topic = await Topic.findById(objId);
+
+      /* Delete topic
+       * Delete user's topic
+       * Delete note's topic (keep that note, just remove array item)
+       */
+      const conn = mongoose.connection;
+      const dbSession = await conn.startSession();
+      await dbSession.withTransaction(async () => {
+        // Remove related on User
+        await User.updateOne({
+          'uid': req.session.userId,
+        }, {
+          $pull: {topics: topic._id},
+        });
+
+        // Remove related on Note
+        await Note.updateMany({
+          'topics': topic._id,
+        }, {
+          $pull: {topics: topic._id},
+        });
+
+        // Delete topic
+        await topic.deleteOne();
+      });
+      dbSession.endSession();
+
+      return res.status(200).json({message: 'Topic removed'});
+    } catch (error) {
+      return res.status(500)
+          .json({message: 'An error occurred', detail: error});
+    }
   }
 }
 
